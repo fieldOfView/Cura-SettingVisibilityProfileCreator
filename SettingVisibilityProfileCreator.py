@@ -4,8 +4,10 @@
 from configparser import ConfigParser
 from collections import OrderedDict
 import os.path
+import urllib
 
 from PyQt5.QtCore import QObject
+from UM.FlameProfiler import pyqtSlot
 
 from cura.CuraApplication import CuraApplication
 
@@ -29,9 +31,17 @@ class SettingVisibilityProfileCreator(Extension, QObject,):
         self._application = CuraApplication.getInstance()
 
         self.setMenuName(catalog.i18nc("@item:inmenu", "Setting Visibility Sets"))
-        self.addMenuItem(catalog.i18nc("@item:inmenu", "Store Custom Setting Visibility Set"), self.createSettingVisibilitySet)
+        self.addMenuItem(catalog.i18nc("@item:inmenu", "Store Custom Setting Visibility Set"), self.showNameDialog)
 
-    def createSettingVisibilitySet(self):
+        self._create_profile_window = None
+
+    def showNameDialog(self):
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ProfileNameDialog.qml")
+        self._create_profile_window = self._application.createQmlComponent(path, {"manager": self})
+        self._create_profile_window.show()
+
+    @pyqtSlot(str)
+    def createSettingVisibilitySet(self, set_name):
         global_stack = self._application.getGlobalContainerStack()
         if not global_stack:
             return
@@ -39,7 +49,10 @@ class SettingVisibilityProfileCreator(Extension, QObject,):
         visible_settings = SettingPreferenceVisibilityHandler().getVisible()
 
         parser = ConfigParser(interpolation = None, allow_no_value = True)  # Accept options without any value
-        parser["general"] = {"name": "Custom"}
+        parser["general"] = {
+            "name": set_name,
+            "weight": 0
+        }
 
         exclude = set(["machine_settings", "command_line_settings"])
         category = ""
@@ -54,7 +67,7 @@ class SettingVisibilityProfileCreator(Extension, QObject,):
                 parser[category][setting.key] = None
 
         storage_path = Resources.getStoragePath(CuraApplication.ResourceTypes.SettingVisibilityPreset)
-        print(os.path.join(storage_path, "custom.cfg"))
 
-        #with open('custom.cfg', 'w') as parser_file:
-        #    parser.write(parser_file)
+        file_name = urllib.parse.quote_plus(set_name)
+        with open(os.path.join(storage_path, "%s.cfg" % file_name), 'w') as parser_file:
+            parser.write(parser_file)

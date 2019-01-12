@@ -15,6 +15,6 @@ UM.RenameDialog
     object: "Custom set"
     onAccepted:
     {
-    	manager.createSettingVisibilitySet(newName)
+    	manager.createSettingVisibilityPreset(newName)
     }
 }

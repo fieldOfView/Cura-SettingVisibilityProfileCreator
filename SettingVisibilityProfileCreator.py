@@ -18,6 +18,8 @@ from UM.Resources import Resources
 from UM.Settings.ContainerRegistry import ContainerRegistry
 from UM.Settings.SettingDefinition import SettingDefinition
 from UM.Settings.Models.SettingPreferenceVisibilityHandler import SettingPreferenceVisibilityHandler
+from cura.Settings.SettingVisibilityPreset import SettingVisibilityPreset
+
 
 from UM.i18n import i18nCatalog
 catalog = i18nCatalog("cura")
@@ -41,19 +43,23 @@ class SettingVisibilityProfileCreator(Extension, QObject,):
         self._create_profile_window.show()
 
     @pyqtSlot(str)
-    def createSettingVisibilitySet(self, set_name):
+    def createSettingVisibilityPreset(self, preset_name):
         global_stack = self._application.getGlobalContainerStack()
         if not global_stack:
             return
 
-        visible_settings = SettingPreferenceVisibilityHandler().getVisible()
+        preset_id = preset_name.lower()
+        new_preset = SettingVisibilityPreset(preset_id = preset_id, name = preset_name)
 
         parser = ConfigParser(interpolation = None, allow_no_value = True)  # Accept options without any value
         parser["general"] = {
-            "name": set_name,
-            "weight": 0
+            "name": new_preset.name,
+            "weight": new_preset.weight
         }
 
+        visible_settings = SettingPreferenceVisibilityHandler().getVisible()
+
+        settings = []
         exclude = set(["machine_settings", "command_line_settings"])
         category = ""
         for setting in global_stack.definition.findDefinitions():
@@ -63,11 +69,25 @@ class SettingVisibilityProfileCreator(Extension, QObject,):
             if setting.type == "category":
                 category = setting.key
                 parser[category] = OrderedDict()
+                settings.append(setting.key)
             elif setting.key in visible_settings:
                 parser[category][setting.key] = None
+                settings.append(setting.key)
+
+        new_preset.setSettings(settings)
 
         storage_path = Resources.getStoragePath(CuraApplication.ResourceTypes.SettingVisibilityPreset)
 
-        file_name = urllib.parse.quote_plus(set_name)
-        with open(os.path.join(storage_path, "%s.cfg" % file_name), 'w') as parser_file:
+        file_name = "%s.cfg" % urllib.parse.quote_plus(preset_id)
+        with open(os.path.join(storage_path, file_name), 'w') as parser_file:
             parser.write(parser_file)
+
+        presets_model = self._application.getSettingVisibilityPresetsModel()
+        # Remove preset with the same name, if any
+        items = [item for item in presets_model.items if item.presetId != preset_id]
+        items.append(new_preset)
+        # Sort them on weight (and if that fails, use ID)
+        items.sort(key = lambda k: (int(k.weight), k.presetId))
+
+        presets_model.setItems(items)
+        presets_model.setActivePreset(preset_id)

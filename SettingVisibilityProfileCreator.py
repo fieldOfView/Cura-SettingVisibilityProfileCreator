@@ -32,7 +32,7 @@ class SettingVisibilityProfileCreator(Extension, QObject,):
 
         self._application = CuraApplication.getInstance()
 
-        self.setMenuName(catalog.i18nc("@item:inmenu", "Setting Visibility Sets"))
+        self.setMenuName(catalog.i18nc("@item:inmenu", "Custom Setting Visibility Sets"))
         self.addMenuItem(catalog.i18nc("@item:inmenu", "Store Custom Setting Visibility Set"), self.showNameDialog)
 
         self._create_profile_window = None

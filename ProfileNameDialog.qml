@@ -12,7 +12,7 @@ UM.RenameDialog
 {
     id: createQualityDialog
     title: catalog.i18nc("@title:window", "Store Custom Setting Visibility Set")
-    object: "Custom set"
+    object: manager.activePresetName
     onAccepted:
     {
     	manager.createSettingVisibilityPreset(newName)

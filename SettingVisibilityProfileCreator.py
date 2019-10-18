@@ -6,7 +6,7 @@ from collections import OrderedDict
 import os.path
 import urllib
 
-from PyQt5.QtCore import QObject
+from PyQt5.QtCore import QObject, pyqtProperty
 from UM.FlameProfiler import pyqtSlot
 
 from cura.CuraApplication import CuraApplication
@@ -41,6 +41,18 @@ class SettingVisibilityProfileCreator(Extension, QObject,):
         path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ProfileNameDialog.qml")
         self._create_profile_window = self._application.createQmlComponent(path, {"manager": self})
         self._create_profile_window.show()
+
+    @pyqtProperty(str, constant = True)
+    def activePresetName(self) -> str:
+        presets_model = self._application.getSettingVisibilityPresetsModel()
+        active_id = presets_model.activePreset
+
+        if active_id:
+            active_model = presets_model.getVisibilityPresetById(active_id)
+            if active_model:
+                return active_model.name
+
+        return "Custom set"
 
     @pyqtSlot(str)
     def createSettingVisibilityPreset(self, preset_name):

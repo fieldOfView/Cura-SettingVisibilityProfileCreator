@@ -18,8 +18,10 @@ from UM.Resources import Resources
 from UM.Settings.ContainerRegistry import ContainerRegistry
 from UM.Settings.SettingDefinition import SettingDefinition
 from UM.Settings.Models.SettingPreferenceVisibilityHandler import SettingPreferenceVisibilityHandler
-from cura.Settings.SettingVisibilityPreset import SettingVisibilityPreset
-
+try:
+    from cura.Settings.SettingVisibilityPreset import SettingVisibilityPreset
+except ImportError:
+    SettingVisibilityPreset = None
 
 from UM.i18n import i18nCatalog
 catalog = i18nCatalog("cura")
@@ -29,6 +31,10 @@ class SettingVisibilityProfileCreator(Extension, QObject,):
     def __init__(self, parent = None):
         QObject.__init__(self, parent)
         Extension.__init__(self)
+
+        if SettingVisibilityPreset is None:
+            Logger.log("e", "SettingVisibilityPreset is not compatible with this version of Cura")
+            return
 
         self._application = CuraApplication.getInstance()
 

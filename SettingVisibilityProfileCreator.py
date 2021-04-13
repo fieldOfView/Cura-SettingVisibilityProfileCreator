@@ -57,10 +57,15 @@ class SettingVisibilityProfileCreator(Extension, QObject,):
         preset_id = preset_name.lower()
         new_preset = SettingVisibilityPreset(preset_id = preset_id, name = preset_name)
 
+        version = 1
+        if ApplicationMetadata.CuraSDKVersion >= "7.5.0":
+            version = 2
+
         parser = ConfigParser(interpolation = None, allow_no_value = True)  # Accept options without any value
         parser["general"] = {
             "name": new_preset.name,
-            "weight": new_preset.weight
+            "weight": new_preset.weight,
+            "version": version
         }
 
         visible_settings = SettingPreferenceVisibilityHandler().getVisible()

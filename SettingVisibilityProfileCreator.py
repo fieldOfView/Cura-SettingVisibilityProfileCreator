@@ -14,6 +14,7 @@ from cura.CuraApplication import CuraApplication
 from UM.Extension import Extension
 from UM.Logger import Logger
 from UM.Resources import Resources
+from UM.Version import Version
 
 from UM.Settings.ContainerRegistry import ContainerRegistry
 from UM.Settings.SettingDefinition import SettingDefinition
@@ -58,8 +59,13 @@ class SettingVisibilityProfileCreator(Extension, QObject,):
         new_preset = SettingVisibilityPreset(preset_id = preset_id, name = preset_name)
 
         version = 1
-        if ApplicationMetadata.CuraSDKVersion >= "7.5.0":
-            version = 2
+        try:
+            if self._application.getAPIVersion() >= Version("7.5.0"):
+                version = 2
+        except AttributeError:
+            # Applocation.getAPIVersion() was introduced in Cura 4.0
+            # version should be 1 in these old versions of Cura
+            pass
 
         parser = ConfigParser(interpolation = None, allow_no_value = True)  # Accept options without any value
         parser["general"] = {

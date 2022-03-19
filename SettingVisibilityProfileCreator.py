@@ -39,13 +39,18 @@ class SettingVisibilityProfileCreator(Extension, QObject,):
 
         self._application = CuraApplication.getInstance()
 
+        self._use_controls1 = False
+        if self._application.getAPIVersion() < Version(8) and self._application.getVersion() != "master":
+            self._use_controls1 = True
+        self._qml_folder = "qml" if not self._use_controls1 else "qml_controls1"
+
         self.setMenuName(catalog.i18nc("@item:inmenu", "Custom Setting Visibility Sets"))
         self.addMenuItem(catalog.i18nc("@item:inmenu", "Store Custom Setting Visibility Set"), self.showNameDialog)
 
         self._create_profile_window = None
 
     def showNameDialog(self):
-        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ProfileNameDialog.qml")
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), self._qml_folder, "ProfileNameDialog.qml")
         self._create_profile_window = self._application.createQmlComponent(path, {"manager": self})
         self._create_profile_window.show()
 

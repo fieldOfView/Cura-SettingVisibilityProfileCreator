@@ -34,6 +34,7 @@ class SettingVisibilityProfileCreator(Extension, QObject,):
         Extension.__init__(self)
 
         if SettingVisibilityPreset == None:
+            # Cura 3.5
             Logger.log("e", "The plugin is not compatible with this version of Cura")
             return
 
@@ -44,8 +45,8 @@ class SettingVisibilityProfileCreator(Extension, QObject,):
             self._use_controls1 = True
         self._qml_folder = "qml" if not self._use_controls1 else "qml_controls1"
 
-        self.setMenuName(catalog.i18nc("@item:inmenu", "Custom Setting Visibility Sets"))
-        self.addMenuItem(catalog.i18nc("@item:inmenu", "Store Custom Setting Visibility Set"), self.showNameDialog)
+        self.setMenuName(catalog.i18nc("@item:inmenu", "Setting Visibility Sets"))
+        self.addMenuItem(catalog.i18nc("@item:inmenu", "Store Customised Setting Visibility Set"), self.showNameDialog)
 
         self._create_profile_window = None
 

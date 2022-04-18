@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Aldo Hoeben / fieldOfView
+# Copyright (c) 2022 Aldo Hoeben / fieldOfView
 # SettingVisibilityProfileCreator is released under the terms of the AGPLv3 or higher.
 
 from configparser import ConfigParser
@@ -6,7 +6,10 @@ from collections import OrderedDict
 import os.path
 import urllib
 
-from PyQt5.QtCore import QObject
+try:
+    from PyQt6.QtCore import QObject
+except ImportError:
+    from PyQt5.QtCore import QObject
 from UM.FlameProfiler import pyqtSlot
 
 from cura.CuraApplication import CuraApplication

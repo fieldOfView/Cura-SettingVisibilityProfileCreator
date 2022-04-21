@@ -6,10 +6,12 @@ from collections import OrderedDict
 import os.path
 import urllib
 
+USE_QT5 = False
 try:
     from PyQt6.QtCore import QObject
 except ImportError:
     from PyQt5.QtCore import QObject
+    USE_QT5 = True
 from UM.FlameProfiler import pyqtSlot
 
 from cura.CuraApplication import CuraApplication
@@ -43,14 +45,7 @@ class SettingVisibilityProfileCreator(Extension, QObject,):
 
         self._application = CuraApplication.getInstance()
 
-        try:
-            use_controls1 = False
-            if self._application.getAPIVersion() < Version(8) and self._application.getVersion() != "master":
-                use_controls1 = True
-        except AttributeError:
-             # UM.Application.getAPIVersion was added for API > 6 (Cura 4)
-            use_controls1 = True
-        self._qml_folder = "qml" if not use_controls1 else "qml_controls1"
+        self._qml_folder = "qml" if not USE_QT5 else "qml_qt5"
 
         self.setMenuName(catalog.i18nc("@item:inmenu", "Setting Visibility Sets"))
         self.addMenuItem(catalog.i18nc("@item:inmenu", "Store Customised Setting Visibility Set"), self.showNameDialog)

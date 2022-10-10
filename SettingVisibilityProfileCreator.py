@@ -6,10 +6,14 @@ from collections import OrderedDict
 import os.path
 import urllib
 
-USE_QT5 = False
 try:
+    from cura.ApplicationMetadata import CuraSDKVersion
+except ImportError: # Cura <= 3.6
+    CuraSDKVersion = "6.0.0"
+USE_QT5 = False
+if CuraSDKVersion >= "8.0.0":
     from PyQt6.QtCore import QObject
-except ImportError:
+else:
     from PyQt5.QtCore import QObject
     USE_QT5 = True
 from UM.FlameProfiler import pyqtSlot
